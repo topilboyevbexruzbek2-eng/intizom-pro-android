@@ -1,0 +1,17 @@
+{
+  "name": "INTIZOM PRO — Offline va tariflar",
+  "short_name": "INTIZOM PRO",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101722",
+  "theme_color": "#101722",
+  "icons": [
+    {
+      "src": "app_icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

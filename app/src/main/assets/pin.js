@@ -1,0 +1,37 @@
+
+'use strict';
+(function(){
+ const KEY='intizom-pro-pin-v1',FAIL='intizom-pro-pin-fail-v1';
+ const wall=document.getElementById('pin-wall'),form=document.getElementById('pin-form'),input=document.getElementById('pin-input'),err=document.getElementById('pin-error'),title=document.getElementById('pin-title'),info=document.getElementById('pin-info'),action=document.getElementById('pin-submit'),cancel=document.getElementById('pin-cancel'),note=document.getElementById('pin-note'),disableButton=document.getElementById('pin-disable');
+ let stage='setup',pending='',unlocked=false,config=null,fail={count:0,until:0};
+ try{config=JSON.parse(localStorage.getItem(KEY)||'null');if(!config||!config.salt||!config.hash||config.v!==1)config=null;}catch(e){config=null}
+ try{fail=JSON.parse(localStorage.getItem(FAIL)||'null')||fail;}catch(e){}
+ function randomSalt(){if(window.crypto&&window.crypto.getRandomValues){const a=new Uint8Array(16);crypto.getRandomValues(a);return Array.from(a,x=>x.toString(16).padStart(2,'0')).join('');}return String(Date.now())+Math.random().toString(36).slice(2)}
+ // SHA-256 implementation for file:// Android WebView where crypto.subtle may be unavailable.
+ function sha256(ascii){const prime=[],hash=[],k=[];let n=2;while(k.length<64){let primeFlag=true;for(let j=2;j*j<=n;j++)if(n%j===0){primeFlag=false;break;}if(primeFlag){if(hash.length<8)hash.push((Math.pow(n,1/2)%1*4294967296)|0);k.push((Math.pow(n,1/3)%1*4294967296)|0);}n++;}
+ const bytes=Array.from(unescape(encodeURIComponent(ascii)),c=>c.charCodeAt(0)),bits=bytes.length*8;bytes.push(128);while(bytes.length%64!==56)bytes.push(0);for(let j=7;j>=0;j--)bytes.push(Math.floor(bits/Math.pow(256,j))&255);
+ for(let off=0;off<bytes.length;off+=64){const w=new Array(64);for(let i=0;i<16;i++){const a=off+i*4;w[i]=(bytes[a]<<24)|(bytes[a+1]<<16)|(bytes[a+2]<<8)|bytes[a+3];}for(let i=16;i<64;i++){const x=w[i-15],y=w[i-2];const s0=(x>>>7|x<<25)^(x>>>18|x<<14)^(x>>>3),s1=(y>>>17|y<<15)^(y>>>19|y<<13)^(y>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0;}let [a,b,c,d,e,f,g,h]=hash;for(let i=0;i<64;i++){const s1=(e>>>6|e<<26)^(e>>>11|e<<21)^(e>>>25|e<<7),ch=(e&f)^(~e&g),t1=(h+s1+ch+k[i]+w[i])|0,s0=(a>>>2|a<<30)^(a>>>13|a<<19)^(a>>>22|a<<10),maj=(a&b)^(a&c)^(b&c),t2=(s0+maj)|0;h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0;}for(let i=0;i<8;i++)hash[i]=(hash[i]+[a,b,c,d,e,f,g,h][i])|0;}return hash.map(v=>(v>>>0).toString(16).padStart(8,'0')).join('');}
+ function derive(pin,salt){let h=sha256('INTIZOM-PIN:'+salt+':'+pin);for(let i=0;i<3200;i++)h=sha256(h+':'+salt+':'+pin);return h;}
+ function safeCompare(a,b){if(!a||!b||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0;}
+ function verify(pin){return !!(config&&safeCompare(derive(pin,config.salt),config.hash));}
+ function pinGood(pin){return /^\d{4,8}$/.test(pin)&&!/^([0-9])\1+$/.test(pin)}
+ function setPin(pin){const salt=randomSalt();config={v:1,salt,hash:derive(pin,salt)};localStorage.setItem(KEY,JSON.stringify(config));fail={count:0,until:0};localStorage.removeItem(FAIL);}
+ function updateStatus(){const node=document.getElementById('pin-state');if(node)node.textContent=config?'✓ PIN himoyasi yoqilgan':'⚠ PIN himoyasi o‘chiq';}
+ function mode(next){stage=next;disableButton.hidden=stage!=='manage';input.value='';err.textContent='';cancel.hidden=!['manage','change-old','change-new','change-confirm','disable'].includes(stage);input.disabled=false;action.disabled=false;const screens={setup:['PIN o‘rnating','Boshqalar ilovangizni ko‘rmasligi uchun 4–8 xonali PIN tanlang.','PIN-kodni davom ettirish'],confirm:['PIN-kodni tasdiqlang','Tanlagan PIN-kodingizni qayta kiriting.','PIN-ni saqlash'],unlock:['INTIZOM PRO qulflangan','Ilovaga kirish uchun PIN-kodingizni kiriting.','Qulfni ochish'],manage:['Kirish xavfsizligi','Amaldagi PIN-kodingizni kiriting.','Davom etish'], 'change-old':['PIN-ni almashtirish','Avval amaldagi PIN-kodingizni kiriting.','Tekshirish'],'change-new':['Yangi PIN-kod','4–8 ta raqamdan iborat yangi PIN-kod tanlang.','Davom etish'],'change-confirm':['Yangi PIN-kodni tasdiqlang','Yangi PIN-kodni qayta kiriting.','PIN-ni almashtirish'],disable:['Himoyani o‘chirish','Himoyani o‘chirish uchun joriy PIN-kodingizni kiriting.','Himoyani o‘chirish']};const v=screens[stage];title.textContent=v[0];info.textContent=v[1];action.textContent=v[2];note.textContent=stage==='setup'?'PIN-kodni unutsangiz, hisobni tiklash xizmati mavjud emas. Ma’lumotlarni zaxiralab qo‘ying.':stage==='unlock'?'5 marta xato kiritilsa, 30 soniyaga kirish cheklanadi.':'PIN faqat shu qurilmada saqlanadi, internet talab qilinmaydi.';wall.hidden=false;document.body.style.overflow='hidden';setTimeout(()=>input.focus(),40)}
+ function open(){if(config){unlocked=false;mode('unlock')}else{unlocked=false;mode('setup')}}
+ function close(){unlocked=true;wall.hidden=true;document.body.style.overflow='';pending='';updateStatus()}
+ function rejected(){fail.count=(fail.count||0)+1;if(fail.count>=5){fail.count=0;fail.until=Date.now()+30000;}try{localStorage.setItem(FAIL,JSON.stringify(fail))}catch(e){}err.textContent=Date.now()<fail.until?'Ko‘p urinish. 30 soniyadan keyin qayta urinib ko‘ring.':'PIN noto‘g‘ri. Qayta urinib ko‘ring.';input.value=''}
+ function check(pin){if(Date.now()<(fail.until||0)){err.textContent='30 soniyalik cheklov tugashini kuting.';return false;}if(!verify(pin)){rejected();return false;}fail={count:0,until:0};try{localStorage.removeItem(FAIL)}catch(e){}return true}
+ form.addEventListener('submit',e=>{e.preventDefault();const p=input.value.trim();if(!/^\d{4,8}$/.test(p)){err.textContent='PIN-kod 4–8 ta raqamdan iborat bo‘lsin.';return;}try{if(stage==='setup'||stage==='change-new'){if(!pinGood(p)){err.textContent='Bir xil raqamlardan iborat PIN tanlamang.';return;}pending=p;mode(stage==='setup'?'confirm':'change-confirm');return;}if(stage==='confirm'||stage==='change-confirm'){if(p!==pending){err.textContent='PIN-kodlar mos kelmadi.';return;}setPin(p);close();return;}if(stage==='unlock'){if(check(p))close();return;}if(stage==='change-old'){if(check(p))mode('change-new');return;}if(stage==='disable'){if(check(p)){localStorage.removeItem(KEY);config=null;close();}return;}if(stage==='manage'){if(check(p)){mode('change-new');}return;}}catch(ex){err.textContent='Saqlashda xatolik: ilova xotirasini tekshiring.';}});
+ disableButton.addEventListener('click',()=>mode('disable'));
+ cancel.addEventListener('click',()=>{if(unlocked)close();else mode(config?'unlock':'setup')});
+ document.addEventListener('click',e=>{const button=e.target.closest&&e.target.closest('#pin-manage');if(button){e.preventDefault();e.stopPropagation();if(config)mode('manage');else mode('setup');}},true);
+ // Lock as soon as the app goes to background. Navigation stays behind an opaque overlay.
+ document.addEventListener('visibilitychange',()=>{if(document.hidden&&config&&unlocked){unlocked=false;mode('unlock')}});
+ window.addEventListener('pagehide',()=>{if(config&&unlocked){unlocked=false;mode('unlock')}});
+ window.addEventListener('pageshow',()=>{if(config&&!unlocked)mode('unlock')});
+ window.addEventListener('focus',()=>{if(config&&!unlocked&&wall.hidden)mode('unlock')});
+ const watcher=new MutationObserver(updateStatus);const app=document.getElementById('app');if(app)watcher.observe(app,{childList:true});
+ open();window.IntizomPin={status:()=>!!config,isLocked:()=>!unlocked,lock:()=>config&&open()};
+})();
+
