@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+ <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+ <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+ <application android:label="INTIZOM PRO" android:icon="@drawable/icon" android:allowBackup="false" android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.NoActionBar">
+  <activity android:name=".MainActivity" android:exported="true">
+   <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+  </activity>
+  <activity android:name=".TelegramImportActivity" android:exported="true">
+   <intent-filter><action android:name="android.intent.action.SEND"/><category android:name="android.intent.category.DEFAULT"/><data android:mimeType="audio/*"/></intent-filter>
+   <intent-filter><action android:name="android.intent.action.SEND"/><category android:name="android.intent.category.DEFAULT"/><data android:mimeType="video/*"/></intent-filter>
+  </activity>
+  <provider android:name=".ImportProvider" android:authorities="uz.intizom.btp.imports" android:exported="false" android:grantUriPermissions="true"/>
+  <receiver android:name=".ReminderReceiver" android:exported="false"/>
+  <receiver android:name=".BootReceiver" android:exported="false">
+   <intent-filter>
+    <action android:name="android.intent.action.BOOT_COMPLETED"/>
+    <action android:name="android.intent.action.TIME_SET"/>
+    <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+   </intent-filter>
+  </receiver>
+ </application>
+</manifest>
