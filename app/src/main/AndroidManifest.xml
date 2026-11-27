@@ -11,7 +11,7 @@
    <intent-filter><action android:name="android.intent.action.SEND"/><category android:name="android.intent.category.DEFAULT"/><data android:mimeType="audio/*"/></intent-filter>
    <intent-filter><action android:name="android.intent.action.SEND"/><category android:name="android.intent.category.DEFAULT"/><data android:mimeType="video/*"/></intent-filter>
   </activity>
-  <provider android:name=".ImportProvider" android:authorities="uz.intizom.btp.imports" android:exported="false" android:grantUriPermissions="true"/>
+  <provider android:name=".ImportProvider" android:authorities="uz.intizom.pro.beta81.imports" android:exported="false" android:grantUriPermissions="true"/>
   <receiver android:name=".ReminderReceiver" android:exported="false"/>
   <receiver android:name=".BootReceiver" android:exported="false">
    <intent-filter>
