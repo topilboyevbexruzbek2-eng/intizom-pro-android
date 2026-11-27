@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data:; media-src 'self' file: content:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="theme-color" content="#101722">
+  <meta name="color-scheme" content="dark light">
+  <title>INTIZOM PRO — 8.1</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="app_icon.png">
+</head>
+<body>
+  <button id="launch-screen" aria-label="INTIZOM PRO ochish"><img src="splash.jpg" alt="INTIZOM PRO — Bexruzbek Topilboyev"></button>
+  <div id="pin-wall" class="pin-wall" role="dialog" aria-modal="true" aria-label="Ilova himoyasi"><div class="pin-card"><div class="pin-emblem">🔐</div><h2 id="pin-title">INTIZOM PRO</h2><p id="pin-info">Shaxsiy ilovangizni himoyalang</p><form id="pin-form" autocomplete="off"><label for="pin-input">PIN-kod</label><input id="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="4–8 raqam" required><p id="pin-error" role="alert"></p><button id="pin-submit" type="submit">Davom etish</button></form><button id="pin-disable" type="button" class="secondary" hidden>Himoyani o‘chirish</button><button id="pin-cancel" type="button" class="secondary" hidden>Bekor qilish</button><small id="pin-note">PIN-kodni unutib qo‘ymang. U serverda saqlanmaydi.</small></div></div>
+  <div class="shell">
+    <header class="top"><div class="brand"><div class="brandmark" aria-hidden="true"><img src="logo.png" alt=""></div><div><h1>INTIZOM <em>PRO</em></h1><p>Har kuni kuchliroq bo‘l</p></div></div><div class="version">8.1</div></header>
+    <div id="backbar" hidden aria-label="Bo‘lim navigatsiyasi"></div>
+    <main id="app"></main>
+  </div>
+  <nav id="nav" aria-label="Asosiy navigatsiya"></nav>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="register.js"></script>
+  <script src="pin.js"></script>
+  <script src="subscription.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
